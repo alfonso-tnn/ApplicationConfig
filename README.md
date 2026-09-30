@@ -6,6 +6,23 @@ translations, errors, globals, branding, and backend APIs.
 The backend explorer displays main endpoints, API URLs stored in options, URL
 parameters, service mappings, and side-by-side differences.
 
+## Saved configurations
+
+Both sources start with `variant=default`. In **Saved configurations**, enter a
+name and select **Save** to store both sources (including advanced fields), the
+ignored-key filter, and the **Regular expressions** checkbox together.
+
+Choose a saved configuration and select **Load** to restore all its fields.
+Loading clears outdated results and cancels any pending comparison; it does not
+fetch data until you select **Fetch & compare**. Saving an existing name requires
+confirmation, as does deleting a configuration.
+
+Presets are stored in local storage for the current browser and website origin.
+They survive reloads but are not shared between browsers, devices, or the local
+development site and GitHub Pages. Clearing browser storage removes them. API
+responses and results are not saved in presets. Storage failures are reported
+without claiming a save succeeded or overwriting unreadable data.
+
 ## Local development
 
 Use Node.js 22 and npm.

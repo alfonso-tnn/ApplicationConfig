@@ -17,6 +17,21 @@ export interface ApplicationConfigRequest {
   variant: string
 }
 
+export const APPLICATION_CONFIG_REQUEST_FIELDS = [
+  'environment', 'appVersion', 'customer', 'deploymentPhase',
+  'device', 'schemaVersion', 'variant',
+] as const satisfies readonly (keyof ApplicationConfigRequest)[]
+
+export const DEFAULT_APPLICATION_CONFIG_REQUEST: ApplicationConfigRequest = {
+  environment: 'p',
+  appVersion: '',
+  customer: 'cdk',
+  deploymentPhase: '',
+  device: 'pc',
+  schemaVersion: '',
+  variant: 'default',
+}
+
 export type ConfigDocument = Record<string, unknown> | unknown[]
 export type ConfigValues = Record<string, string | undefined>
 export type DiffStatus = 'changed' | 'onlyBaseline' | 'onlyCandidate' | 'unchanged'

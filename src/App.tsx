@@ -21,6 +21,7 @@ import {
   Search,
 } from 'lucide-react'
 import { ConfigPanel } from './components/ConfigPanel'
+import { ConfigurationPresets } from './components/ConfigurationPresets'
 import { BackendExplorer } from './components/BackendExplorer'
 import { JsonViewer } from './components/JsonViewer'
 import { ResultsTable } from './components/ResultsTable'
@@ -31,7 +32,9 @@ import {
 } from './domain/appVersionHistory'
 import {
   buildApplicationConfigUrl,
+  APPLICATION_CONFIG_REQUEST_FIELDS,
   CONFIG_DATA_TYPES,
+  DEFAULT_APPLICATION_CONFIG_REQUEST,
   compareApplicationConfigs,
   fetchAllComparisonDocuments,
   validateTranslationKeyFilter,
@@ -41,6 +44,7 @@ import {
   type ConfigDocument,
   type TranslationKeyFilter,
 } from './domain/applicationConfig'
+import type { ConfigurationSettings } from './domain/configurationPresets'
 
 type ViewMode = 'files' | 'differences' | 'unique' | 'endpoints'
 
@@ -79,16 +83,6 @@ interface DataTypeContent {
 const RESULT_PAGE_SIZE = 150
 const APP_VERSION_HISTORY_STORAGE_KEY =
   'application-config.app-version-history.v1'
-
-const DEFAULT_REQUEST: ApplicationConfigRequest = {
-  environment: 'p',
-  appVersion: '',
-  customer: 'cdk',
-  deploymentPhase: '',
-  device: 'pc',
-  schemaVersion: '',
-  variant: 'adb_g3',
-}
 
 const DATA_TYPE_CONTENT: Record<ConfigDataType, DataTypeContent> = {
   translations: {
@@ -138,8 +132,6 @@ const DATA_TYPE_CONTENT: Record<ConfigDataType, DataTypeContent> = {
   },
 }
 
-const REQUEST_FIELDS = Object.keys(DEFAULT_REQUEST) as (keyof ApplicationConfigRequest)[]
-
 function loadAppVersionHistory(): string[] {
   try {
     const storedHistory = localStorage.getItem(APP_VERSION_HISTORY_STORAGE_KEY)
@@ -155,7 +147,7 @@ function requestsMatch(
   current: ApplicationConfigRequest,
   loaded: ApplicationConfigRequest,
 ): boolean {
-  return REQUEST_FIELDS.every((field) => current[field] === loaded[field])
+  return APPLICATION_CONFIG_REQUEST_FIELDS.every((field) => current[field] === loaded[field])
 }
 
 function countDifferences(comparison: ConfigComparison): number {
@@ -166,9 +158,9 @@ function countDifferences(comparison: ConfigComparison): number {
 
 export default function App() {
   const [baselineRequest, setBaselineRequest] =
-    useState<ApplicationConfigRequest>(DEFAULT_REQUEST)
+    useState<ApplicationConfigRequest>(DEFAULT_APPLICATION_CONFIG_REQUEST)
   const [candidateRequest, setCandidateRequest] =
-    useState<ApplicationConfigRequest>(DEFAULT_REQUEST)
+    useState<ApplicationConfigRequest>(DEFAULT_APPLICATION_CONFIG_REQUEST)
   const [appVersionHistory, setAppVersionHistory] =
     useState<string[]>(loadAppVersionHistory)
   const [activeDataType, setActiveDataType] =
@@ -245,6 +237,24 @@ export default function App() {
     setVisibleLimit(RESULT_PAGE_SIZE)
   }
 
+  function loadConfiguration(settings: ConfigurationSettings) {
+    requestController.current?.abort()
+    requestController.current = null
+    setIsLoading(false)
+    setPendingIdenticalComparison(null)
+    setBaselineRequest({ ...settings.baselineRequest })
+    setCandidateRequest({ ...settings.candidateRequest })
+    setIgnoredKeyPatterns(settings.ignoredKeyPatterns)
+    setUseRegex(settings.useRegex)
+    setLoaded(null)
+    setError(null)
+    setActiveDataType('translations')
+    setViewMode('differences')
+    setSearchQuery('')
+    setLanguage('all')
+    setVisibleLimit(RESULT_PAGE_SIZE)
+  }
+
   async function runComparison(input: ComparisonInput) {
     requestController.current?.abort()
 
@@ -259,6 +269,7 @@ export default function App() {
         input.candidateRequest,
         controller.signal,
       )
+      if (controller.signal.aborted || requestController.current !== controller) return
       const results: Partial<Record<
         ConfigDataType,
         LoadedDataTypeComparison
@@ -327,6 +338,7 @@ export default function App() {
         setVisibleLimit(RESULT_PAGE_SIZE)
       })
     } catch (requestError) {
+      if (controller.signal.aborted || requestController.current !== controller) return
       if (
         requestError instanceof DOMException &&
         requestError.name === 'AbortError'
@@ -493,6 +505,11 @@ export default function App() {
             </div>
             <span className="endpoint-path">{CONFIG_DATA_TYPES.length} endpoints per source</span>
           </div>
+
+          <ConfigurationPresets
+            settings={{ baselineRequest, candidateRequest, ignoredKeyPatterns, useRegex }}
+            onLoad={loadConfiguration}
+          />
 
           <form onSubmit={handleCompare}>
             <div className="source-grid">

@@ -1991,6 +1991,135 @@ tbody tr:hover > * {
   }
 }
 
+.preset-panel {
+  margin-bottom: 20px;
+  padding: 18px 20px;
+  border: 1px solid #b9d3c8;
+  border-radius: 6px;
+  background: #f0f7f2;
+}
+
+.preset-panel__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
+  color: var(--teal-dark);
+}
+
+.preset-panel__header svg {
+  flex-shrink: 0;
+}
+
+.preset-panel h3 {
+  margin: 0;
+  font-size: 13px;
+}
+
+.preset-panel__header p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.preset-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.preset-save,
+.preset-load {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.preset-load {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.preset-panel .request-field {
+  min-width: 0;
+}
+
+.preset-panel select {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0 10px;
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  font-size: 12px;
+}
+
+.preset-controls button {
+  width: auto;
+  min-height: 40px;
+}
+
+.preset-delete {
+  padding: 0 10px;
+  color: var(--danger);
+}
+
+.preset-panel button:disabled,
+.preset-panel select:disabled,
+.preset-panel input:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.preset-confirmation,
+.preset-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.preset-confirmation {
+  padding: 12px;
+  color: #83540c;
+  border: 1px solid #e9d5a8;
+  border-radius: 4px;
+  background: #fff7e5;
+}
+
+.preset-confirmation > span {
+  flex: 1 1 240px;
+}
+
+.preset-error {
+  color: var(--danger);
+}
+
+.preset-error svg {
+  flex-shrink: 0;
+}
+
+.preset-message {
+  min-height: 14px;
+  margin: 10px 0 0;
+  color: var(--teal-dark);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 800px) {
+  .preset-controls { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .preset-panel { padding: 16px; }
+}
+
 .backend-explorer {
   display: grid;
   gap: 16px;
