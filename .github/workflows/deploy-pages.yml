@@ -1,0 +1,64 @@
+name: Validate and publish GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Test
+        run: npm test
+      - name: Read Pages configuration
+        if: github.event_name != 'pull_request'
+        id: pages
+        uses: actions/configure-pages@v6
+      - name: Build
+        run: npm run build
+        env:
+          VITE_BASE_PATH: ${{ github.event_name == 'pull_request' && format('/{0}/', github.event.repository.name) || format('{0}/', steps.pages.outputs.base_path) }}
+      - name: Upload website
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.publish.outputs.page_url }}
+    steps:
+      - name: Publish website
+        id: publish
+        uses: actions/deploy-pages@v5
